@@ -58,7 +58,7 @@ class Leche(APIView):
                 message.append(
                     "Formato de fecha equivocado. Formato aceptado: DD-MM-YYYY")
         if general_status == status.HTTP_200_OK:
-            return Response({"status": status.HTTP_200_OK, "message": "OK"})
+            return Response({"status": status.HTTP_200_OK, "message": "OK", "result": {"_id": tambo, 'fecha': fecha, "estado": estado}})
         else:
             return Response({"status": general_status, "message": message})
 
@@ -97,7 +97,7 @@ class Leche(APIView):
                     "Formato de fecha equivocado. Formato aceptado: DD-MM-YYYY")
 
         if general_status == status.HTTP_200_OK:
-            return Response({"status": general_status, "message": message})
+            return Response({"status": general_status, "message": message, "result": {"_id": tambo, 'fecha': fecha, "estado": estado}})
         else:
             return Response({"status": general_status, "message": message})
 
@@ -180,7 +180,7 @@ class Curado(APIView):
                 message.append(
                     "Formato de fecha equivocado. Formato aceptado: DD-MM-YYYY")
         if general_status == status.HTTP_200_OK:
-            return Response({"status": status.HTTP_200_OK, "message": "OK"})
+            return Response({"status": status.HTTP_200_OK, "message": "OK", "result": {'_id': max_id+1, 'humedad': humedad, 'temperatura': temperatura, 'co2': co2}})
         else:
             return Response({"status": general_status, "message": message})
 
@@ -239,7 +239,7 @@ class Curado(APIView):
                 message.append(
                     "Formato de fecha equivocado. Formato aceptado: DD-MM-YYYY")
         if general_status == status.HTTP_200_OK:
-            return Response({"status": status.HTTP_200_OK, "message": "OK"})
+            return Response({"status": status.HTTP_200_OK, "message": "OK", 'result': {'_id': id, 'humedad': humedad, 'temperatura': temperatura, 'co2': co2}})
         else:
             return Response({"status": general_status, "message": message})
 
