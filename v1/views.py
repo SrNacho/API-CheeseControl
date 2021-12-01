@@ -49,7 +49,7 @@ class Leche(APIView):
                             int(temp_entrada)
                             try:
                                 collection_leche.insert_one(
-                                    {"_id": tambo, 'fecha': fecha, "estado": estado, 'calidad': calidad, 'temp_entrada': temp_entrada})
+                                    {"_id": tambo, 'fecha': fecha, "estado": estado, 'calidad': calidad, 'temp_entrada': int(temp_entrada)})
                                 general_status = status.HTTP_200_OK
                             except:
                                 general_status = status.HTTP_400_BAD_REQUEST
@@ -69,7 +69,7 @@ class Leche(APIView):
                 message.append(
                     "Formato de fecha equivocado. Formato aceptado: DD-MM-YYYY")
         if general_status == status.HTTP_200_OK:
-            return Response({"status": status.HTTP_200_OK, "message": "OK", "result": {"_id": tambo, 'fecha': fecha, "estado": estado, 'calidad': calidad, 'temp_entrada': temp_entrada}})
+            return Response({"status": status.HTTP_200_OK, "message": "OK", "result": {"_id": tambo, 'fecha': fecha, "estado": estado, 'calidad': calidad, 'temp_entrada': int(temp_entrada)}})
         else:
             return Response({"status": general_status, "message": message})
 
@@ -98,7 +98,7 @@ class Leche(APIView):
                                 int(temp_entrada)
                                 try:
                                     collection_leche.update_one(
-                                        {"_id": tambo}, {"$set": {'fecha': fecha, "estado": estado, 'calidad': calidad, 'temp_entrada': temp_entrada}})
+                                        {"_id": tambo}, {"$set": {'fecha': fecha, "estado": estado, 'calidad': calidad, 'temp_entrada': int(temp_entrada)}})
                                     general_status = status.HTTP_200_OK
                                     message.append("OK")
                                 except Exception as ex:
@@ -127,7 +127,7 @@ class Leche(APIView):
                     "Formato de fecha equivocado. Formato aceptado: DD-MM-YYYY")
 
         if general_status == status.HTTP_200_OK:
-            return Response({"status": general_status, "message": message, "result": {"_id": tambo, 'fecha': fecha, "estado": estado, 'calidad': calidad, 'temp_entrada': temp_entrada}})
+            return Response({"status": general_status, "message": message, "result": {"_id": tambo, 'fecha': fecha, "estado": estado, 'calidad': calidad, 'temp_entrada': int(temp_entrada)}})
         else:
             return Response({"status": general_status, "message": message})
 
@@ -194,7 +194,7 @@ class Curado(APIView):
                             int(co2)
                             general_status = status.HTTP_200_OK
                             collection_curado.insert_one(
-                                {'_id': max_id+1, 'humedad': humedad, 'temperatura': temperatura, 'co2': co2})
+                                {'_id': max_id+1, 'humedad': int(humedad), 'temperatura': int(temperatura), 'co2': int(co2)})
                         except:
                             general_status: status.HTTP_400_BAD_REQUEST
                             message.append("CO2 debe ser numerico")
@@ -210,7 +210,7 @@ class Curado(APIView):
                 message.append(
                     "Formato de fecha equivocado. Formato aceptado: DD-MM-YYYY")
         if general_status == status.HTTP_200_OK:
-            return Response({"status": status.HTTP_200_OK, "message": "OK", "result": {'_id': max_id+1, 'humedad': humedad, 'temperatura': temperatura, 'co2': co2}})
+            return Response({"status": status.HTTP_200_OK, "message": "OK", "result": {'_id': max_id+1, 'humedad': int(humedad), 'temperatura': int(temperatura), 'co2': int(co2)}})
         else:
             return Response({"status": general_status, "message": message})
 
@@ -243,7 +243,7 @@ class Curado(APIView):
                                     try:
                                         general_status = status.HTTP_200_OK
                                         collection_curado.update_one(
-                                            {'_id': id}, {'$set': {'humedad': humedad, 'temperatura': temperatura, 'co2': co2}})
+                                            {'_id': id}, {'$set': {'humedad': int(humedad), 'temperatura': int(temperatura), 'co2': int(co2)}})
                                     except:
                                         general_status: status.HTTP_400_BAD_REQUEST
                                         message.append("No existe el registro")
@@ -269,7 +269,7 @@ class Curado(APIView):
                 message.append(
                     "Formato de fecha equivocado. Formato aceptado: DD-MM-YYYY")
         if general_status == status.HTTP_200_OK:
-            return Response({"status": status.HTTP_200_OK, "message": "OK", 'result': {'_id': id, 'humedad': humedad, 'temperatura': temperatura, 'co2': co2}})
+            return Response({"status": status.HTTP_200_OK, "message": "OK", 'result': {'_id': id, 'humedad': int(humedad), 'temperatura': int(temperatura), 'co2': int(co2)}})
         else:
             return Response({"status": general_status, "message": message})
 
