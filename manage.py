@@ -7,8 +7,8 @@ import dotenv
 
 def main():
     """Run administrative tasks."""
-    dotenv_path = os.path.join(os.path.dirname(__file__), 'VARIABLES.env')
-    dotenv.read_dotenv(dotenv_path)
+    # dotenv_path = os.path.join(os.path.dirname(__file__), 'VARIABLES.env')
+    # dotenv.read_dotenv(dotenv_path)
     os.environ.setdefault('DJANGO_SETTINGS_MODULE',
                           'api_cheesecontrol.settings')
     try:
