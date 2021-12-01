@@ -29,75 +29,105 @@ class Leche(APIView):
     def post(self, request):
         posted_fields = list(self.request.data.keys())
         posted_values = list(self.request.data.values())
-        accepted_fields = ['tambo', 'fecha', 'estado']
+        accepted_fields = ['tambo', 'fecha',
+                           'estado', 'calidad', 'temp_entrada']
         general_status = status.HTTP_400_BAD_REQUEST  # nopep8 // Status general, puede ser 200 o 400
         message = []
 
         # Verifica que todos los argumentos hayan sido pasados a la request
         all_args_passed_check = True if all(
             item in posted_fields for item in accepted_fields) else message.append(
-                "Argumentos insuficientes en la request. Se espera 'tambo', 'fecha', 'estado'")
+                "Argumentos insuficientes en la request. Se espera 'tambo', 'fecha', 'estado', 'calidad', 'temp_entrada'")
 
         if all_args_passed_check:
             try:
-                tambo, fecha, estado = posted_values
+                tambo, fecha, estado, calidad, temp_entrada = posted_values
                 datetime.datetime.strptime(fecha, '%d-%m-%Y')  # nopep8 // valida la fecha en el formato DD-MM-YYYY
                 if estado.isalnum():
-                    try:
-                        collection_leche.insert_one(
-                            {"_id": tambo, 'fecha': fecha, "estado": estado})
-                        general_status = status.HTTP_200_OK
-                    except:
+                    if calidad.isalnum():
+                        try:
+                            int(temp_entrada)
+                            try:
+                                collection_leche.insert_one(
+                                    {"_id": tambo, 'fecha': fecha, "estado": estado, 'calidad': calidad, 'temp_entrada': temp_entrada})
+                                general_status = status.HTTP_200_OK
+                            except:
+                                general_status = status.HTTP_400_BAD_REQUEST
+                                message.append("ID del TAMBO ya existente")
+                        except:
+                            general_status = status.HTTP_400_BAD_REQUEST
+                            message.append("temp_entrada es un campo numerico")
+                    else:
                         general_status = status.HTTP_400_BAD_REQUEST
-                        message.append("ID del TAMBO ya existente")
+                        message.append(
+                            "CALIDAD vacio o con caracteres invalidos")
                 else:
                     general_status = status.HTTP_400_BAD_REQUEST
-                    message.append("Estado vacio o con caracteres invalidos")
+                    message.append("ESTADO vacio o con caracteres invalidos")
             except:
                 general_status = status.HTTP_400_BAD_REQUEST
                 message.append(
                     "Formato de fecha equivocado. Formato aceptado: DD-MM-YYYY")
         if general_status == status.HTTP_200_OK:
-            return Response({"status": status.HTTP_200_OK, "message": "OK", "result": {"_id": tambo, 'fecha': fecha, "estado": estado}})
+            return Response({"status": status.HTTP_200_OK, "message": "OK", "result": {"_id": tambo, 'fecha': fecha, "estado": estado, 'calidad': calidad, 'temp_entrada': temp_entrada}})
         else:
             return Response({"status": general_status, "message": message})
 
     def put(self, request):
         posted_fields = list(self.request.data.keys())
         posted_values = list(self.request.data.values())
-        accepted_fields = ['tambo', 'fecha', 'estado']
+        accepted_fields = ['tambo', 'fecha',
+                           'estado', 'calidad', 'temp_entrada']
         general_status = status.HTTP_400_BAD_REQUEST  # nopep8 // Status general, puede ser 200 o 400
         message = []
 
         # Verifica que todos los argumentos hayan sido pasados a la request
         all_args_passed_check = True if all(
             item in posted_fields for item in accepted_fields) else message.append(
-                "Argumentos insuficientes en la request. Se espera 'tambo', 'fecha', 'estado'")
+                "Argumentos insuficientes en la request. Se espera 'tambo', 'fecha', 'estado', 'calidad', 'temp_entrada'")
 
         if all_args_passed_check:
             try:
-                tambo, fecha, estado = posted_values
-                datetime.datetime.strptime(fecha, '%d-%m-%Y')  # nopep8 // valida la fecha en el formato DD-MM-YYYY
-                if estado.isalnum():
-                    try:
-                        collection_leche.update_one(
-                            {"_id": tambo}, {"$set": {'fecha': fecha, "estado": estado}})
-                        general_status = status.HTTP_200_OK
-                        message.append("OK")
-                    except Exception as ex:
-                        print(ex)
+                tambo, fecha, estado, calidad, temp_entrada = posted_values
+                exists = [x for x in collection_curado.find({'_id': tambo})]
+                if exists:
+                    datetime.datetime.strptime(fecha, '%d-%m-%Y')  # nopep8 // valida la fecha en el formato DD-MM-YYYY
+                    if estado.isalnum():
+                        if calidad.isalnum():
+                            try:
+                                int(temp_entrada)
+                                try:
+                                    collection_leche.update_one(
+                                        {"_id": tambo}, {"$set": {'fecha': fecha, "estado": estado, 'calidad': calidad, 'temp_entrada': temp_entrada}})
+                                    general_status = status.HTTP_200_OK
+                                    message.append("OK")
+                                except Exception as ex:
+                                    print(ex)
+                                    general_status = status.HTTP_400_BAD_REQUEST
+                                    message.append("Unknown error")
+                            except:
+                                general_status = status.HTTP_400_BAD_REQUEST
+                                message.append(
+                                    "temp_entrada es un campo numerico")
+                        else:
+                            general_status = status.HTTP_400_BAD_REQUEST
+                            message.append(
+                                "CALIDAD vacio o con caracteres invalidos")
+                    else:
                         general_status = status.HTTP_400_BAD_REQUEST
-                        message.append("Unknown error")
+                        message.append(
+                            "Estado vacio o con caracteres invalidos")
                 else:
                     general_status = status.HTTP_400_BAD_REQUEST
-                    message.append("Estado vacio o con caracteres invalidos")
+                    message.append(
+                        "No existe un registro con el ID {}".format(tambo))
             except:
                 general_status = status.HTTP_400_BAD_REQUEST
                 message.append(
                     "Formato de fecha equivocado. Formato aceptado: DD-MM-YYYY")
 
         if general_status == status.HTTP_200_OK:
-            return Response({"status": general_status, "message": message, "result": {"_id": tambo, 'fecha': fecha, "estado": estado}})
+            return Response({"status": general_status, "message": message, "result": {"_id": tambo, 'fecha': fecha, "estado": estado, 'calidad': calidad, 'temp_entrada': temp_entrada}})
         else:
             return Response({"status": general_status, "message": message})
 
