@@ -321,12 +321,12 @@ class Quesos(APIView):
                         try:
                             int(maduracion)
                             try:
-                                collection_leche.insert_one(
+                                collection_quesos.insert_one(
                                     {"_id": tanda, 'producido': producido, "calidad": calidad, 'maduracion': int(maduracion)})
                                 general_status = status.HTTP_200_OK
                             except:
                                 general_status = status.HTTP_400_BAD_REQUEST
-                                message.append("ID del TAMBO ya existente")
+                                message.append("ID de la TANDA ya existente")
                         except:
                             general_status = status.HTTP_400_BAD_REQUEST
                             message.append(
@@ -372,7 +372,7 @@ class Quesos(APIView):
                             try:
                                 int(maduracion)
                                 try:
-                                    collection_leche.update_one(
+                                    collection_quesos.update_one(
                                         {"_id": tanda}, {"$set": {'producido': producido, "calidad": calidad, 'maduracion': int(maduracion)}})
                                     general_status = status.HTTP_200_OK
                                     message.append("OK")
@@ -416,9 +416,9 @@ class Quesos(APIView):
         all_args_passed = True if all(
             item in posted_fields for item in accepted_fields) else message.append("Argumentos esperados: 'tanda'")
 
-        exists = [x for x in collection_leche.find({'_id': tanda})]
+        exists = [x for x in collection_quesos.find({'_id': tanda})]
         if all_args_passed and exists:
-            collection_leche.delete_one({'_id': tanda})
+            collection_quesos.delete_one({'_id': tanda})
             general_status = status.HTTP_200_OK
         else:
             general_status = status.HTTP_400_BAD_REQUEST
