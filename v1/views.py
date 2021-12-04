@@ -41,7 +41,7 @@ class Leche(APIView):
 
         if all_args_passed_check:
             try:
-                tambo, fecha, estado, calidad, temp_entrada = posted_values
+                tambo, fecha, estado, temp_entrada = posted_values
                 datetime.datetime.strptime(fecha, '%d-%m-%Y')  # nopep8 // valida la fecha en el formato DD-MM-YYYY
                 if estado.isalnum():
                     try:
@@ -83,7 +83,7 @@ class Leche(APIView):
 
         if all_args_passed_check:
             try:
-                tambo, fecha, estado, calidad, temp_entrada = posted_values
+                tambo, fecha, estado, temp_entrada = posted_values
                 exists = [x for x in collection_curado.find({'_id': tambo})]
                 if exists:
                     datetime.datetime.strptime(fecha, '%d-%m-%Y')  # nopep8 // valida la fecha en el formato DD-MM-YYYY
