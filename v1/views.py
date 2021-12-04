@@ -302,18 +302,18 @@ class Quesos(APIView):
         posted_fields = list(self.request.data.keys())
         posted_values = list(self.request.data.values())
         accepted_fields = ['tanda', 'producido',
-                           'calidad', 'maduracion']
+                           'calidad', 'maduracion', 'cant_quesos']
         general_status = status.HTTP_400_BAD_REQUEST  # nopep8 // Status general, puede ser 200 o 400
         message = []
 
         # Verifica que todos los argumentos hayan sido pasados a la request
         all_args_passed_check = True if all(
             item in posted_fields for item in accepted_fields) else message.append(
-                "Argumentos insuficientes en la request. Se espera 'tanda', 'producido', 'calidad', 'maduracion'")
+                "Argumentos insuficientes en la request. Se espera 'tanda', 'producido', 'calidad', 'maduracion', 'cant_quesos'")
 
         if all_args_passed_check:
             try:
-                tanda, producido, calidad, maduracion = posted_values
+                tanda, producido, calidad, maduracion, cant_quesos = posted_values
                 datetime.datetime.strptime(producido, '%d-%m-%Y')  # nopep8 // valida la fecha en el formato DD-MM-YYYY
                 try:
                     int(tanda)
@@ -321,12 +321,19 @@ class Quesos(APIView):
                         try:
                             int(maduracion)
                             try:
-                                collection_quesos.insert_one(
-                                    {"_id": tanda, 'producido': producido, "calidad": calidad, 'maduracion': int(maduracion)})
-                                general_status = status.HTTP_200_OK
+                                int(cant_quesos)
+                                try:
+                                    collection_quesos.insert_one(
+                                        {"_id": tanda, 'producido': producido, "calidad": calidad, 'maduracion': int(maduracion), 'cant_quesos': cant_quesos})
+                                    general_status = status.HTTP_200_OK
+                                except:
+                                    general_status = status.HTTP_400_BAD_REQUEST
+                                    message.append(
+                                        "ID de la TANDA ya existente")
                             except:
                                 general_status = status.HTTP_400_BAD_REQUEST
-                                message.append("ID de la TANDA ya existente")
+                                message.append(
+                                    "CANT_QUESOS es un campo numerico")
                         except:
                             general_status = status.HTTP_400_BAD_REQUEST
                             message.append(
@@ -343,7 +350,7 @@ class Quesos(APIView):
                 message.append(
                     "Formato de fecha equivocado. Formato aceptado: DD-MM-YYYY")
         if general_status == status.HTTP_200_OK:
-            return Response({"status": status.HTTP_200_OK, "message": "OK", "result": {"_id": tanda, 'producido': producido, "calidad": calidad, 'maduracion': int(maduracion)}})
+            return Response({"status": status.HTTP_200_OK, "message": "OK", "result": {"_id": tanda, 'producido': producido, "calidad": calidad, 'maduracion': int(maduracion), 'cant_quesos': int(cant_quesos)}})
         else:
             return Response({"status": general_status, "message": message})
 
@@ -351,18 +358,18 @@ class Quesos(APIView):
         posted_fields = list(self.request.data.keys())
         posted_values = list(self.request.data.values())
         accepted_fields = ['tanda', 'producido',
-                           'calidad', 'maduracion']
+                           'calidad', 'maduracion', 'cant_quesos']
         general_status = status.HTTP_400_BAD_REQUEST  # nopep8 // Status general, puede ser 200 o 400
         message = []
 
         # Verifica que todos los argumentos hayan sido pasados a la request
         all_args_passed_check = True if all(
             item in posted_fields for item in accepted_fields) else message.append(
-                "Argumentos insuficientes en la request. Se espera 'tanda', 'producido', 'calidad', 'maduracion'")
+                "Argumentos insuficientes en la request. Se espera 'tanda', 'producido', 'calidad', 'maduracion', 'cant_quesos'")
 
         if all_args_passed_check:
             try:
-                tanda, producido, calidad, maduracion = posted_values
+                tanda, producido, calidad, maduracion, cant_quesos = posted_values
                 exists = [x for x in collection_quesos.find({'_id': tanda})]
                 if exists:
                     datetime.datetime.strptime(producido, '%d-%m-%Y')  # nopep8 // valida la fecha en el formato DD-MM-YYYY
@@ -372,14 +379,20 @@ class Quesos(APIView):
                             try:
                                 int(maduracion)
                                 try:
-                                    collection_quesos.update_one(
-                                        {"_id": tanda}, {"$set": {'producido': producido, "calidad": calidad, 'maduracion': int(maduracion)}})
-                                    general_status = status.HTTP_200_OK
-                                    message.append("OK")
-                                except Exception as ex:
-                                    print(ex)
+                                    int(cant_quesos)
+                                    try:
+                                        collection_quesos.update_one(
+                                            {"_id": tanda}, {"$set": {'producido': producido, "calidad": calidad, 'maduracion': int(maduracion), 'cant_quesos': cant_quesos}})
+                                        general_status = status.HTTP_200_OK
+                                        message.append("OK")
+                                    except Exception as ex:
+                                        print(ex)
+                                        general_status = status.HTTP_400_BAD_REQUEST
+                                        message.append("Unknown error")
+                                except:
                                     general_status = status.HTTP_400_BAD_REQUEST
-                                    message.append("Unknown error")
+                                    message.append(
+                                        "CANT_QUESOS es un campo numerico")
                             except:
                                 general_status = status.HTTP_400_BAD_REQUEST
                                 message.append(
@@ -402,7 +415,7 @@ class Quesos(APIView):
                     "Formato de fecha equivocado. Formato aceptado: DD-MM-YYYY")
 
         if general_status == status.HTTP_200_OK:
-            return Response({"status": general_status, "message": message, "result": {"_id": tanda, 'producido': producido, "calidad": calidad, 'maduracion': int(maduracion)}})
+            return Response({"status": general_status, "message": message, "result": {"_id": tanda, 'producido': producido, "calidad": calidad, 'maduracion': int(maduracion), 'cant_quesos': cant_quesos}})
         else:
             return Response({"status": general_status, "message": message})
 
