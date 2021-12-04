@@ -317,28 +317,24 @@ class Quesos(APIView):
                 datetime.datetime.strptime(producido, '%d-%m-%Y')  # nopep8 // valida la fecha en el formato DD-MM-YYYY
                 try:
                     int(tanda)
-                    if producido.isalnum():
-                        if calidad.isalnum():
+                    if calidad.isalnum():
+                        try:
+                            int(maduracion)
                             try:
-                                int(maduracion)
-                                try:
-                                    collection_leche.insert_one(
-                                        {"_id": tanda, 'producido': producido, "calidad": calidad, 'maduracion': int(maduracion)})
-                                    general_status = status.HTTP_200_OK
-                                except:
-                                    general_status = status.HTTP_400_BAD_REQUEST
-                                    message.append("ID del TAMBO ya existente")
+                                collection_leche.insert_one(
+                                    {"_id": tanda, 'producido': producido, "calidad": calidad, 'maduracion': int(maduracion)})
+                                general_status = status.HTTP_200_OK
                             except:
                                 general_status = status.HTTP_400_BAD_REQUEST
-                                message.append(
-                                    "temp_entrada es un campo numerico")
-                        else:
+                                message.append("ID del TAMBO ya existente")
+                        except:
                             general_status = status.HTTP_400_BAD_REQUEST
                             message.append(
-                                "CALIDAD es un campo alfanumerico")
+                                "MADURACION es un campo numerico")
                     else:
                         general_status = status.HTTP_400_BAD_REQUEST
-                        message.append("PRODUCIDO es un campo alfanumerico")
+                        message.append(
+                            "CALIDAD es un campo alfanumerico")
                 except:
                     general_status = status.HTTP_400_BAD_REQUEST
                     message.append("TANDA vacio o con caracteres invalidos")
@@ -372,31 +368,26 @@ class Quesos(APIView):
                     datetime.datetime.strptime(producido, '%d-%m-%Y')  # nopep8 // valida la fecha en el formato DD-MM-YYYY
                     try:
                         int(tanda)
-                        if producido.isalnum():
-                            if calidad.isalnum():
+                        if calidad.isalnum():
+                            try:
+                                int(maduracion)
                                 try:
-                                    int(maduracion)
-                                    try:
-                                        collection_leche.update_one(
-                                            {"_id": tanda}, {"$set": {'producido': producido, "calidad": calidad, 'maduracion': int(maduracion)}})
-                                        general_status = status.HTTP_200_OK
-                                        message.append("OK")
-                                    except Exception as ex:
-                                        print(ex)
-                                        general_status = status.HTTP_400_BAD_REQUEST
-                                        message.append("Unknown error")
-                                except:
+                                    collection_leche.update_one(
+                                        {"_id": tanda}, {"$set": {'producido': producido, "calidad": calidad, 'maduracion': int(maduracion)}})
+                                    general_status = status.HTTP_200_OK
+                                    message.append("OK")
+                                except Exception as ex:
+                                    print(ex)
                                     general_status = status.HTTP_400_BAD_REQUEST
-                                    message.append(
-                                        "temp_entrada es un campo numerico")
-                            else:
+                                    message.append("Unknown error")
+                            except:
                                 general_status = status.HTTP_400_BAD_REQUEST
                                 message.append(
-                                    "CALIDAD es un campo alfanumerico")
+                                    "MADURACION es un campo numerico")
                         else:
                             general_status = status.HTTP_400_BAD_REQUEST
                             message.append(
-                                "PRODUCIDO es un campo alfanumerico")
+                                "CALIDAD es un campo alfanumerico")
                     except:
                         general_status = status.HTTP_400_BAD_REQUEST
                         message.append(
