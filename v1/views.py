@@ -14,6 +14,7 @@ client = MongoClient(DB_CFG)
 db = client['olimpiadas']
 collection_leche = db['leche']
 collection_curado = db['curado']
+collection_quesos = db['quesos']
 
 
 class Leche(APIView):
@@ -276,6 +277,157 @@ class Curado(APIView):
         exists = [x for x in collection_curado.find({'_id': id})]
         if all_args_passed and exists:
             collection_curado.delete_one({'_id': id})
+            general_status = status.HTTP_200_OK
+        else:
+            general_status = status.HTTP_400_BAD_REQUEST
+            message.append("El registro no existe")
+
+        if general_status == status.HTTP_200_OK:
+            return Response({"status": general_status, "message": message})
+        else:
+            return Response({"status": general_status, "message": message})
+
+
+class Quesos(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request):
+        results = [x for x in collection_quesos.find()]
+        if results:
+            return Response({'status': status.HTTP_200_OK, 'results': results})
+        else:
+            return Response({'status': status.HTTP_400_BAD_REQUEST, 'message': ["Base de datos vacia"]})
+
+    def post(self, request):
+        posted_fields = list(self.request.data.keys())
+        posted_values = list(self.request.data.values())
+        accepted_fields = ['tanda', 'producido',
+                           'calidad', 'maduracion']
+        general_status = status.HTTP_400_BAD_REQUEST  # nopep8 // Status general, puede ser 200 o 400
+        message = []
+
+        # Verifica que todos los argumentos hayan sido pasados a la request
+        all_args_passed_check = True if all(
+            item in posted_fields for item in accepted_fields) else message.append(
+                "Argumentos insuficientes en la request. Se espera 'tanda', 'producido', 'calidad', 'maduracion'")
+
+        if all_args_passed_check:
+            try:
+                tanda, producido, calidad, maduracion = posted_values
+                datetime.datetime.strptime(producido, '%d-%m-%Y')  # nopep8 // valida la fecha en el formato DD-MM-YYYY
+                try:
+                    int(tanda)
+                    if producido.isalnum():
+                        if calidad.isalnum():
+                            try:
+                                int(maduracion)
+                                try:
+                                    collection_leche.insert_one(
+                                        {"_id": tanda, 'producido': producido, "calidad": calidad, 'maduracion': int(maduracion)})
+                                    general_status = status.HTTP_200_OK
+                                except:
+                                    general_status = status.HTTP_400_BAD_REQUEST
+                                    message.append("ID del TAMBO ya existente")
+                            except:
+                                general_status = status.HTTP_400_BAD_REQUEST
+                                message.append(
+                                    "temp_entrada es un campo numerico")
+                        else:
+                            general_status = status.HTTP_400_BAD_REQUEST
+                            message.append(
+                                "CALIDAD es un campo alfanumerico")
+                    else:
+                        general_status = status.HTTP_400_BAD_REQUEST
+                        message.append("PRODUCIDO es un campo alfanumerico")
+                except:
+                    general_status = status.HTTP_400_BAD_REQUEST
+                    message.append("TANDA vacio o con caracteres invalidos")
+            except:
+                general_status = status.HTTP_400_BAD_REQUEST
+                message.append(
+                    "Formato de fecha equivocado. Formato aceptado: DD-MM-YYYY")
+        if general_status == status.HTTP_200_OK:
+            return Response({"status": status.HTTP_200_OK, "message": "OK", "result": {"_id": tanda, 'producido': producido, "calidad": calidad, 'maduracion': int(maduracion)}})
+        else:
+            return Response({"status": general_status, "message": message})
+
+    def put(self, request):
+        posted_fields = list(self.request.data.keys())
+        posted_values = list(self.request.data.values())
+        accepted_fields = ['tanda', 'producido',
+                           'calidad', 'maduracion']
+        general_status = status.HTTP_400_BAD_REQUEST  # nopep8 // Status general, puede ser 200 o 400
+        message = []
+
+        # Verifica que todos los argumentos hayan sido pasados a la request
+        all_args_passed_check = True if all(
+            item in posted_fields for item in accepted_fields) else message.append(
+                "Argumentos insuficientes en la request. Se espera 'tanda', 'producido', 'calidad', 'maduracion'")
+
+        if all_args_passed_check:
+            try:
+                tanda, producido, calidad, maduracion = posted_values
+                exists = [x for x in collection_quesos.find({'_id': tanda})]
+                if exists:
+                    datetime.datetime.strptime(producido, '%d-%m-%Y')  # nopep8 // valida la fecha en el formato DD-MM-YYYY
+                    try:
+                        int(tanda)
+                        if producido.isalnum():
+                            if calidad.isalnum():
+                                try:
+                                    int(maduracion)
+                                    try:
+                                        collection_leche.update_one(
+                                            {"_id": tanda}, {"$set": {'producido': producido, "calidad": calidad, 'maduracion': int(maduracion)}})
+                                        general_status = status.HTTP_200_OK
+                                        message.append("OK")
+                                    except Exception as ex:
+                                        print(ex)
+                                        general_status = status.HTTP_400_BAD_REQUEST
+                                        message.append("Unknown error")
+                                except:
+                                    general_status = status.HTTP_400_BAD_REQUEST
+                                    message.append(
+                                        "temp_entrada es un campo numerico")
+                            else:
+                                general_status = status.HTTP_400_BAD_REQUEST
+                                message.append(
+                                    "CALIDAD es un campo alfanumerico")
+                        else:
+                            general_status = status.HTTP_400_BAD_REQUEST
+                            message.append(
+                                "PRODUCIDO es un campo alfanumerico")
+                    except:
+                        general_status = status.HTTP_400_BAD_REQUEST
+                        message.append(
+                            "TANDA vacio o con caracteres invalidos")
+                else:
+                    general_status = status.HTTP_400_BAD_REQUEST
+                    message.append(
+                        "No existe un registro con el ID {}".format(tanda))
+            except:
+                general_status = status.HTTP_400_BAD_REQUEST
+                message.append(
+                    "Formato de fecha equivocado. Formato aceptado: DD-MM-YYYY")
+
+        if general_status == status.HTTP_200_OK:
+            return Response({"status": general_status, "message": message, "result": {"_id": tanda, 'producido': producido, "calidad": calidad, 'maduracion': int(maduracion)}})
+        else:
+            return Response({"status": general_status, "message": message})
+
+    def delete(self, request):
+        posted_fields = list(self.request.data.keys())
+        tanda = list(self.request.data.values())[0]
+        general_status = status.HTTP_400_BAD_REQUEST  # nopep8 // Status general, puede ser 200 o 400
+        accepted_fields = ['tanda']
+        message = []
+
+        all_args_passed = True if all(
+            item in posted_fields for item in accepted_fields) else message.append("Argumentos esperados: 'tanda'")
+
+        exists = [x for x in collection_leche.find({'_id': tanda})]
+        if all_args_passed and exists:
+            collection_leche.delete_one({'_id': tanda})
             general_status = status.HTTP_200_OK
         else:
             general_status = status.HTTP_400_BAD_REQUEST
